@@ -50,6 +50,24 @@ async function questionsPrompt() {
 }
 questionsPrompt();
 
+async function  viewAllEmployees(){
+    console.log('tested')
+}
+async function viewAllEmpDepartments(){
+    console.log('tested')
+}
+async function viewAllEmpRoles(){
+    console.log('tested')
+}
 async function addEmployee(){
+    console.log('tested')
+}
+async function updateEmpRole(){
+    console.log('tested')
+}
+async function addRole(){
+    console.log('tested')
+}
+async function addDepartment(){
     console.log('tested')
 }
