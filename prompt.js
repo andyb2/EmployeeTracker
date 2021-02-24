@@ -15,8 +15,6 @@ async function questionsPrompt() {
         }
     ])
 
-    console.log(introQuestion.firstChoice)
-    
     switch(questionList.firstChoice){
         case 'View all Employees':
             viewAllEmployees();
@@ -50,7 +48,7 @@ async function questionsPrompt() {
 }
 questionsPrompt();
 
-async function  viewAllEmployees(){
+async function viewAllEmployees(){
     console.log('tested')
 }
 async function viewAllEmpDepartments(){
@@ -60,14 +58,30 @@ async function viewAllEmpRoles(){
     console.log('tested')
 }
 async function addEmployee(){
-    console.log('tested')
+    let roleDb = db.query('SELECT * FROM roles')
+    const addEmpQuestion = await inquirer.prompt([
+        {message: 'What is the employees first name?', name: 'firstName'},
+        {message: 'What is the employees last name?', name: 'lastName'},
+        {type: 'list', message: 'What is the employees role?', name: 'role', choices: [`${roleDb}`]}
+    ])
 }
+
 async function updateEmpRole(){
     console.log('tested')
 }
+
 async function addRole(){
     console.log('tested')
 }
+
 async function addDepartment(){
-    console.log('tested')
+    const addDeptQuestion = await inquirer.prompt([
+        {message: 'What is the department name?', name: 'deptName'},
+    ])
+    if(addDeptQuestion.deptName !== ''){
+        let deptDb = await db.query(`INSERT INTO department (nameDepart) VALUES ('${addDeptQuestion.deptName}');`);
+        console.log(`[Department]: ${addDeptQuestion.deptName} created`)
+    }
+    console.log(await db.query(`SELECT * FROM department;`))
+    questionsPrompt();
 }
