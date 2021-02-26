@@ -43,6 +43,11 @@ async function questionsPrompt() {
 
         case 'Add department':
             addDepartment();
+
+        case 'Exit Application':
+            process.exit
+            break;
+
         default:
             process.exit
     }
@@ -50,7 +55,7 @@ async function questionsPrompt() {
 questionsPrompt();
 
 async function viewAllEmployees() {
-    let allEmp = db.query('SELECT * FROM employee') 
+    let allEmp = await db.query('SELECT * FROM employee') 
     console.table(allEmp)
 }
 async function viewAllEmpDepartments() {
@@ -60,16 +65,33 @@ async function viewAllEmpRoles() {
     // let viewRoles = db.query('S')
 }
 async function addEmployee() {
-  
-    const addEmpQuestion = await inquirer.prompt([
-        { message: 'What is the employees first name?', name: 'firstName' },
-        { message: 'What is the employees last name?', name: 'lastName' },
-        { type: 'list', message: 'What is the employees role?', name: 'role', choices: [`${roleQuery}`] }
-    ]);
-    console.log(`[Employee Added]: ${addEmpQuestion.firstName}, ${addEmpQuestion.lastName}`)
+    let rolesQuery = await db.query(`SELECT * FROM roles;`);
+    const rolesList = rolesQuery.map(({id, title})=>({
+        name: title,
+        value: id,
+    }));
+    let empQuery = await db.query(`SELECT * FROM employee;`);
+    const managerList = empQuery.map(({id, first_name, last_name})=>({
+        name: `${first_name} ${last_name}`,
+        value: id,
+    }));
+    managerList.push({ name: "None", value: null });
 
-    let addEmp = db.query(`INSERT INTO employee (first_name, last_name) VALUES ('${firstName}', '${lastName})`)
-    let roleQuery = db.query(`SELECT * FROM role`)
+    const addEmpQuestion = await inquirer.prompt([
+        { message: 'What is the employees first name?', name: 'first_name' },
+        { message: 'What is the employees last name?', name: 'last_name' },
+        { type: 'list', message: 'What is the employees role?', name: 'role_id', choices: rolesList },
+        { type: 'list', message: 'Who is the manager of this employee?', name: 'manager_id', choices: managerList }
+    ]);
+    
+    console.table(`
+    ---------------------------------------------
+    [Employee Added]: ${addEmpQuestion.first_name}, ${addEmpQuestion.last_name}, ${addEmpQuestion.role_id}, ${addEmpQuestion.manager_id}
+    ---------------------------------------------
+    `)
+    // if(addEmpQuestion.manager_id === 'None'){
+    await db.query(`INSERT INTO employee (first_name, last_name, role_id, manager_id) VALUES ('${addEmpQuestion.first_name}', '${addEmpQuestion.last_name}', '${addEmpQuestion.role_id}', ${addEmpQuestion.manager_id});`)
+    questionsPrompt();
 }
 
 async function updateEmpRole() {
@@ -79,21 +101,24 @@ async function updateEmpRole() {
 async function addRole() {
     let deptQuery = await db.query(`SELECT * FROM department;`);
     //dList=[{name:,value:},{}]
-    const dList = deptQuery.map(({id, nameDepart})=>({
+    const departmentList = deptQuery.map(({id, nameDepart})=>({
         name: nameDepart,
         value: id,
     }));
-    console.log(dList)
-
+    
     const addRoleQuestion = await inquirer.prompt([
         { message: 'What is the title of the role?', name: 'title' },
         { message: 'What is the salary of this role?', name: 'salary' },
-        { type: 'list', message: 'What is the department?', name: 'department_id', choices: dList },
+        { type: 'list', message: 'What is the department?', name: 'department_id', choices: departmentList },
     ]);
-        
-        return await db.query(`INSERT INTO roles (title, salary, department_id) VALUES ('${addRoleQuestion.title}', '${addRoleQuestion.salary}', ${addRoleQuestion.department_id});`)
-        // console.log(`[Role Added]: ${addRoleQuestion.roleName}, [Salary]: $${addRoleQuestion.roleSalary} per year`)
-
+    
+    await db.query(`INSERT INTO roles (title, salary, department_id) VALUES ('${addRoleQuestion.title}', '${addRoleQuestion.salary}', ${addRoleQuestion.department_id});`)
+        console.table(`
+        -----------------------------------------------
+        [Role Added]: ${addRoleQuestion.title}
+        [Salary]: $${addRoleQuestion.salary} per year
+        -----------------------------------------------
+        `)
     questionsPrompt();
 }
 
@@ -108,7 +133,3 @@ async function addDepartment() {
     console.log(await db.query(`SELECT * FROM department;`));
     questionsPrompt();
 }
-
-// async function retDeptNames(){
-//     return await db.query(`SELECT * FROM department`);
-// }
