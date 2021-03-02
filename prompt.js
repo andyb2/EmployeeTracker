@@ -82,7 +82,8 @@ async function viewAllEmpDepartments() {
   console.log("tested");
 }
 async function viewAllEmpRoles() {
-  // let viewRoles = db.query('S')
+  let allRoles = await db.query(`SELECT roles.title, roles.salary FROM roles`);
+  console.table(allRoles);
 }
 async function addEmployee() {
   let rolesQuery = await db.query(`SELECT * FROM roles;`);
