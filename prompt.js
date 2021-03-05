@@ -50,6 +50,7 @@ async function questionsPrompt() {
 
     case "Add department":
       addDepartment();
+      break;
 
     case "Exit Application":
       process.exit();
@@ -57,6 +58,7 @@ async function questionsPrompt() {
 
     default:
       process.exit();
+      break;
   }
 }
 questionsPrompt();
@@ -174,7 +176,7 @@ async function addEmployee() {
 
   console.table(`
     ---------------------------------------------
-    [Employee Added]: ${addEmpQuestion.first_name}, ${addEmpQuestion.last_name}, ${addEmpQuestion.role_id}, ${addEmpQuestion.manager_id}
+    [Employee Added]: ${addEmpQuestion.first_name}, ${addEmpQuestion.last_name}
     ---------------------------------------------
     `);
 
@@ -275,6 +277,5 @@ async function addDepartment() {
     );
     console.log(`[Department]: ${addDeptQuestion.deptName} created`);
   }
-  console.log(await db.query(`SELECT * FROM department;`));
   questionsPrompt();
 }
