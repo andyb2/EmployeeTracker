@@ -7,7 +7,11 @@ CREATE TABLE employee(
     first_name VARCHAR(30),
     last_name VARCHAR(30),
     role_id INT,
-    manager_id INT DEFAULT NULL
+    INDEX role_ind (role_id),
+    CONSTRAINT fk_role FOREIGN KEY (role_id) REFERENCES role(id) ON DELETE CASCADE
+    manager_id INT,
+    INDEX man_ind (manager_id),
+    CONSTRAINT fk_manager FOREIGN KEY (manager_id) REFERENCES employee(id) ON DELETE SET NULL
 );
 
 CREATE TABLE roles(
