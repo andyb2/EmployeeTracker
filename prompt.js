@@ -12,7 +12,7 @@ async function questionsPrompt() {
       name: "firstChoice",
       choices: [
         "View all Employees",
-        "View all employees by Department",
+        "View all by Department",
         "View all employees by Role",
         "Add employee",
         "Update employee role",
@@ -28,7 +28,7 @@ async function questionsPrompt() {
       viewAllEmployees();
       break;
 
-    case "View all employees by Department":
+    case "View all by Department":
       viewAllEmpDepartments();
       break;
 
@@ -52,11 +52,11 @@ async function questionsPrompt() {
       addDepartment();
 
     case "Exit Application":
-      process.exit;
+      process.exit();
       break;
 
     default:
-      process.exit;
+      process.exit();
   }
 }
 questionsPrompt();
@@ -77,14 +77,74 @@ async function viewAllEmployees() {
   } else {
     console.table(allEmp);
   }
+  questionsPrompt();
 }
 async function viewAllEmpDepartments() {
-  console.log("tested");
+  let departmentQuery = await db.query(`SELECT * FROM department`);
+  const departmentList = departmentQuery.map(({ id, nameDepart }) => ({
+    name: nameDepart,
+    value: id,
+  }));
+
+  const departmentAns = await inquirer.prompt([
+    {
+      type: "list",
+      message: "Choose a department",
+      name: "department",
+      choices: departmentList,
+    },
+  ]);
+
+  if (departmentQuery.length === 0) {
+    console.log(`
+    ---------------------------
+    There are no employees yet!
+    ---------------------------
+    `);
+  } else {
+    let empDepartments = await db.query(
+      `SELECT employee.first_name, employee.last_name FROM employee AS employee LEFT JOIN roles AS roles ON employee.role_id = roles.id LEFT JOIN department AS department ON roles.department_id = department.id WHERE department.id = '${departmentAns.department}'`
+    );
+    console.table(empDepartments);
+  }
+  questionsPrompt();
 }
+
 async function viewAllEmpRoles() {
-  let allRoles = await db.query(`SELECT roles.title, roles.salary FROM roles`);
-  console.table(allRoles);
+  let rolesQuery = await db.query(`SELECT * FROM roles`);
+
+  const rolesList = rolesQuery.map(({ id, title }) => ({
+    name: title,
+    value: title,
+  }));
+
+  const rolesAns = await inquirer.prompt([
+    {
+      type: "list",
+      message: "Choose a role",
+      name: "role",
+      choices: rolesList,
+    },
+  ]);
+
+  if (rolesQuery.length === 0) {
+    console.log(`
+    ---------------------------
+    There are no roles yet!
+    ---------------------------
+    `);
+    questionsPrompt();
+  } else {
+    console.log(rolesAns);
+    let allRoles = await db.query(
+      `SELECT employee.first_name, employee.last_name FROM employee LEFT JOIN roles ON employee.role_id = roles.id WHERE roles.title = '${rolesAns.role}'`
+    );
+    console.log(allRoles);
+    console.table(allRoles);
+    questionsPrompt();
+  }
 }
+
 async function addEmployee() {
   let rolesQuery = await db.query(`SELECT * FROM roles;`);
   const rolesList = rolesQuery.map(({ id, title }) => ({
@@ -120,8 +180,6 @@ async function addEmployee() {
     [Employee Added]: ${addEmpQuestion.first_name}, ${addEmpQuestion.last_name}, ${addEmpQuestion.role_id}, ${addEmpQuestion.manager_id}
     ---------------------------------------------
     `);
-  //  look into this more... might be able to do something like this
-  // console.log(`${role_id}` = rolesQuery.name)
 
   await db.query(
     `INSERT INTO employee (first_name, last_name, role_id, manager_id) VALUES ('${addEmpQuestion.first_name}', '${addEmpQuestion.last_name}', '${addEmpQuestion.role_id}', ${addEmpQuestion.manager_id});`
@@ -130,12 +188,51 @@ async function addEmployee() {
 }
 
 async function updateEmpRole() {
-  console.log("tested");
+  let empList = await db.query(`SELECT * FROM employee`);
+  const employees = empList.map(({ id, first_name, last_name }) => ({
+    name: `${first_name} ${last_name}`,
+    value: id,
+  }));
+  const employeeUpdate = await inquirer.prompt([
+    {
+      type: "list",
+      message: "Choose employee",
+      name: "chooseEmp",
+      choices: employees,
+    },
+  ]);
+
+  let roleList = await db.query(`SELECT * FROM roles`);
+  const employeesRole = roleList.map(({ id, title }) => ({
+    name: title,
+    value: id,
+  }));
+  const roleListQuestions = await inquirer.prompt([
+    {
+      type: "list",
+      message: "Choose a role",
+      name: "newRole",
+      choices: employeesRole,
+    },
+  ]);
+
+  let roleChange = await db.query(
+    `UPDATE employee SET role_id = ${roleListQuestions.newRole} WHERE employee.id = ${employeeUpdate.chooseEmp}`
+  );
+  console.table(`
+  -------------------
+  ROLE UPDATED
+  -------------------
+  `);
+  let newEmpRole = await db.query(
+    `SELECT employee.id, employee.first_name, employee.last_name, roles.title, department.nameDepart AS department, roles.salary, CONCAT (manager.first_name, manager.last_name) AS manager FROM employee LEFT JOIN roles ON employee.role_id = roles.id LEFT JOIN department ON roles.department_id = department.id LEFT JOIN employee manager ON manager.id = employee.manager_id;`
+  );
+  console.table(newEmpRole);
+  questionsPrompt();
 }
 
 async function addRole() {
   let deptQuery = await db.query(`SELECT * FROM department;`);
-  //dList=[{name:,value:},{}]
   const departmentList = deptQuery.map(({ id, nameDepart }) => ({
     name: nameDepart,
     value: id,
