@@ -80,6 +80,7 @@ async function viewAllEmployees() {
   }
   questionsPrompt();
 }
+
 async function viewAllEmpDepartments() {
   let departmentQuery = await db.query(`SELECT * FROM department`);
   const departmentList = departmentQuery.map(({ id, nameDepart }) => ({
@@ -138,7 +139,6 @@ async function viewAllEmpRoles() {
     let allRoles = await db.query(
       `SELECT employee.first_name, employee.last_name FROM employee LEFT JOIN roles ON employee.role_id = roles.id WHERE roles.title = '${rolesAns.role}'`
     );
-    console.log(allRoles);
     console.table(allRoles);
   }
   questionsPrompt();
