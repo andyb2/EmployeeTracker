@@ -35,7 +35,7 @@ Right click prompt.js, open with integrated terminal and type node prompt.js.
 
 ![start app](/Assets/screenshots/startSS.JPG)
 
-A list of questions will appear prompt user choice.
+A list of questions will be prompted allowing the user to choose what they want to do.
 
 ![start app](/Assets/screenshots/allQuestionSS.JPG)
 
