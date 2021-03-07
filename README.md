@@ -59,6 +59,8 @@ After the user has finished creating their company, they can select the exit app
 
 ![start app](/Assets/screenshots/exitAppSS.JPG)
 
+Video explanation: [Video explanation link](https://drive.google.com/file/d/13gxj6GhcYPb3BAd-LM6LvyLCvQEi0up6/view)
+
 # Credits
 
 Created by:
